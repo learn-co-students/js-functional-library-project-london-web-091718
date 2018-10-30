@@ -4,22 +4,157 @@ fi = (function() {
       return 'Start by reading https://medium.com/javascript-scene/master-the-javascript-interview-what-is-functional-programming-7f218c68b3a0'
     },
 
-    each: function() {
-
+    each: function(collection, callback) {
+      for (const item in collection) {
+        callback(collection[item])
+      }
+      return collection
     },
 
-    map: function() {
-
+    map: function(collection, callback) {
+      const result = []
+      for (const item in collection) {
+        result.push(callback(collection[item]))
+      }
+      return result
     },
 
-    reduce: function() {
-
+    reduce: function(collection, callback, acc=0) {
+      for (const item in collection) {
+        acc = callback(acc, collection[item], collection)
+      }
+      return acc
     },
-    
-    functions: function() {
 
+    find: function(collection, predicate) {
+      for (const item in collection) {
+        if (predicate(collection[item])) {
+          return collection[item]
+        }
+      }
     },
 
+    filter: function(collection, predicate) {
+      let array = []
+      for (const item in collection) {
+        if (predicate(collection[item])) {
+          array.push(collection[item])
+        }
+      }
+      return array
+    },
+
+    size: function(collection) {
+      let count = 0
+      for (const item in collection) {
+        ++count
+      }
+      return count
+    },
+
+    first: function(collection, n) {
+      for (const item in collection) {
+        return (n) ? collection.slice(0,n) : collection[item]
+      }
+    },
+
+    last: function(collection, n=0) {
+      for (const item in collection) {
+        return (n > 0) ? collection.slice(-n) : collection.length
+      }
+    },
+
+    compact: function(collection) {
+      const falsey = new Set([false, null, 0, "", undefined, NaN])
+        return collection.filter(item => !falsey.has(item))
+    },
+
+    sortBy: function(collection, callback) {
+     const newArr = [...collection]
+     return newArr.sort(function(a, b) {
+       return callback(a) - callback(b)
+     })
+   },
+
+   unpack: function(receiver, arr) {
+     for (let val of arr)
+       receiver.push(val)
+   },
+
+   flatten: function(collection, shallow, newArr=[]) {
+     if (!Array.isArray(collection)) return newArr.push(collection)
+     if (shallow) {
+       for (let val of collection)
+         Array.isArray(val) ? this.unpack(newArr, val) : newArr.push(val)
+     } else {
+       for (let val of collection) {
+         this.flatten(val, false, newArr)
+       }
+     }
+     return newArr
+   },
+
+   uniqSorted: function(collection, iteratee) {
+     const sorted = [collection[0]]
+     for (let idx = 1; idx < collection.length; idx++) {
+       if (sorted[idx-1] !== collection[idx])
+         sorted.push(collection[idx])
+     }
+     return sorted
+   },
+
+   uniq: function(collection, sorted=false, iteratee=false) {
+     if (sorted) {
+       return fi.uniqSorted(collection, iteratee)
+     } else if (!iteratee) {
+       return Array.from(new Set(collection))
+     } else {
+       const modifiedVals = new Set()
+       const uniqVals = new Set()
+       for (let val of collection) {
+         const moddedVal = iteratee(val)
+         if (!modifiedVals.has(moddedVal)) {
+           modifiedVals.add(moddedVal)
+           uniqVals.add(val)
+         }
+       }
+       return Array.from(uniqVals)
+     }
+   },
+
+   keys: function(obj) {
+     // Using for loop
+     const keys = []
+     for (let key in obj){
+       keys.push(key)
+     }
+     return keys
+   },
+
+   values: function(obj) {
+     // Using for loop
+     const values = []
+     for (let key in obj){
+       values.push(obj[key])
+     }
+     return values
+
+     // Using the custom 'map' method from above
+     // return this.map(obj, (value) => value)
+
+   },
+
+   functions: function(obj) {
+     const functionNames = []
+
+     for (let key in obj) {
+       if (typeof obj[key] === "function"){
+         functionNames.push(key)
+       }
+     }
+
+     return functionNames.sort()
+   },
 
   }
 })()
